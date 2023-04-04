@@ -18,13 +18,23 @@ const server = new aws.ec2.Instance("web-server", {
 
 export const instanceId = server.id;
 
+const s3bucket = new aws.s3.Bucket("lb-01-logs", {
+  acl: "private",
+  tags: {
+    Environment: "Dev",
+    Name: "LB-01 Logs",
+  },
+});
+
+export const s3bucketName = s3bucket.bucket;
+
 const lb = new aws.elb.LoadBalancer("lb-01", {
   availabilityZones: ["us-east-1a", "us-east-1b", "us-east-1c"],
-  /// accessLogs: {
-  ///   bucket: "lb-01-logs",
-  ///   bucketPrefix: "lb-01",
-  ///   interval: 60,
-  /// },
+  accessLogs: {
+    bucket: s3bucketName,
+    bucketPrefix: "lb-01",
+    interval: 60,
+  },
   listeners: [
     {
       instancePort: 8000,
