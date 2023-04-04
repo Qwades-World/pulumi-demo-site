@@ -16,7 +16,50 @@ const server = new aws.ec2.Instance("web-server", {
   vpcSecurityGroupIds: [group.name], // reference the security group resource above
 });
 
+export const instanceId = server.id;
+
+const lb = new aws.elb.LoadBalancer("lb-01", {
+  availabilityZones: ["us-east-1a", "us-east-1b", "us-east-1c"],
+  /// accessLogs: {
+  ///   bucket: "lb-01-logs",
+  ///   bucketPrefix: "lb-01",
+  ///   interval: 60,
+  /// },
+  listeners: [
+    {
+      instancePort: 8000,
+      instanceProtocol: "http",
+      lbPort: 80,
+      lbProtocol: "http",
+    },
+    {
+      instancePort: 8000,
+      instanceProtocol: "http",
+      lbPort: 443,
+      lbProtocol: "https",
+      sslCertificateId:
+        "arn:aws:acm:us-east-1:758478930676:certificate/ac956acb-a1d6-4161-aef3-5293e3231527",
+    },
+  ],
+  healthCheck: {
+    healthyThreshold: 2,
+    unhealthyThreshold: 2,
+    timeout: 3,
+    target: "HTTP:8000/",
+    interval: 30,
+  },
+  instances: [instanceId],
+  crossZoneLoadBalancing: true,
+  idleTimeout: 400,
+  connectionDraining: true,
+  connectionDrainingTimeout: 400,
+  tags: {
+    Name: "web-server-lb-01",
+  },
+});
+
 export const publicIp = server.publicIp;
 export const publicDns = server.publicDns;
 export const securityGroupId = group.name;
 export const keyName = server.keyName;
+export const lbName = lb.name;
