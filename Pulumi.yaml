@@ -1,3 +1,3 @@
-name: demo-stie-000
+name: demo-site-000
 runtime: nodejs
 description: A minimal AWS TypeScript Pulumi program

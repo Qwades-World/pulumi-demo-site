@@ -7,6 +7,15 @@ const group = new aws.ec2.SecurityGroup("web-sg", {
     { protocol: "tcp", fromPort: 80, toPort: 80, cidrBlocks: ["0.0.0.0/0"] },
     { protocol: "tcp", fromPort: 22, toPort: 22, cidrBlocks: ["8.23.69.7/32"] },
   ],
+  egress: [
+    {
+      fromPort: 0,
+      toPort: 0,
+      protocol: "-1",
+      cidrBlocks: ["0.0.0.0/0"],
+      ipv6CidrBlocks: ["::/0"],
+    },
+  ],
 });
 
 const server = new aws.ec2.Instance("web-server", {
@@ -30,11 +39,11 @@ export const s3bucketName = s3bucket.bucket;
 
 const lb = new aws.elb.LoadBalancer("lb-01", {
   availabilityZones: ["us-east-1a", "us-east-1b", "us-east-1c"],
-  accessLogs: {
-    bucket: s3bucketName,
-    bucketPrefix: "lb-01",
-    interval: 60,
-  },
+  //accessLogs: {
+  //  bucket: s3bucketName,
+  //  bucketPrefix: "lb-01",
+  //  interval: 60,
+  //},
   listeners: [
     {
       instancePort: 8000,
